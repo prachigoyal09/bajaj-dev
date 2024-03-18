@@ -1,67 +1,51 @@
-// index.js
 const express = require('express');
-const bodyParser = require('body-parser');
-
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(bodyParser.json());
+app.use(express.json());
 
-// POST route
 app.post('/bfhl', (req, res) => {
-  try {
-    // Extracting the array from the request body
-    const { array } = req.body;
+  const { data } = req.body;
 
-    // Initialize response object
-    const response = {
-      user_id: generateUserId(), // Generating user_id
-      is_success: true, // Assuming success by default
-      even_numbers: [],
-      odd_numbers: [],
-      uppercase_alphabets: []
-    };
-
-    // Handling array processing
-    if (!Array.isArray(array)) {
-      throw new Error('Input is not an array.');
-    }
-
-    array.forEach(element => {
-      // Check if the element is a number and divisible by 2
-      if (typeof element === 'number' && element % 2 === 0) {
-        response.even_numbers.push(element);
-      } else if (typeof element === 'number' && element % 2 !== 0) {
-        response.odd_numbers.push(element);
-      } else if (typeof element === 'string') {
-        // Convert alphabets to uppercase
-        const uppercaseString = element.toUpperCase();
-        response.uppercase_alphabets.push(uppercaseString);
-      }
+  if (!Array.isArray(data)) {
+    return res.status(400).json({
+      is_success: false,
+      error: 'Invalid input. Please provide an array.',
     });
-
-    // Sending the response
-    res.json(response);
-  } catch (error) {
-    // Handling errors gracefully
-    res.status(400).json({ is_success: false, error: error.message });
   }
+
+  const evenNumbers = [];
+  const oddNumbers = [];
+  const alphabets = [];
+
+  data.forEach(item => {
+    if (typeof item === 'number') {
+      if (item % 2 === 0) {
+        evenNumbers.push(item);
+      } else {
+        oddNumbers.push(item);
+      }
+    } else if (typeof item === 'string') {
+      if (/^[a-zA-Z]+$/.test(item)) {
+        alphabets.push(item.toUpperCase());
+      }
+    }
+  });
+
+  const userId = `john_doe_${new Date().getFullYear()}`;
+
+  res.status(200).json({
+    is_success: true,
+    user_id: userId,
+    email: 'john@xyz.com',
+    roll_number: 'ABCD123',
+    odd_numbers: oddNumbers,
+    even_numbers: evenNumbers,
+    alphabets: alphabets,
+  });
 });
 
-// Function to generate user_id
-function generateUserId() {
-  const today = new Date();
-  const formattedDate = today.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  }).replace(/\//g, '');
+const PORT = process.env.PORT || 3000;
 
-  return user_id_${formattedDate};
-}
-
-// Starting the server
 app.listen(PORT, () => {
-  console.log(Server is running on port ${PORT});
+  console.log(`Server is running on port ${PORT}`);
 });
